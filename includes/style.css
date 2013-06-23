@@ -1,0 +1,8 @@
+.gallery a img { 
+	-moz-border-radius: 25px;
+	-webkit-border-radius: 25px;
+	border-radius: 25px;
+	margin:15px;
+	border:0;
+	vertical-align:middle;
+}
