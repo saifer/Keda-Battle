@@ -3,76 +3,104 @@ header('Content-Type: text/html; charset=UTF-8');
 include('../includes/init_sql.php');
 set_time_limit(0);
 error_reporting(E_ERROR); 
+ini_set('xdebug.var_display_max_depth', '10');
+ini_set('xdebug.var_display_max_children', '256');
+ini_set('xdebug.var_display_max_data', '1024');
+ini_set("display_errors", 1); 
+session_start();
+require_once 'vendor/autoload.php';
+
+// Sākam!
 echo "<hr/><b>BILDES</b><br/><hr/>";
-function curlit($url)
-{
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL,$url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
-		$return=curl_exec ($ch);
-		curl_close ($ch);
-		return $return;
+
+//Detaļas
+$blacklist = array('Auto Backup', '2017-09-03', 'Screen Captures', 'Vivus MTB Tukums', 'Collages', 'sniegs', 'Samč18', 'Kolāžas', 'Ekrāna tvērumi', 'nooo', 'nooo2', 'noo1', 'noo0', 'Profile Photos', '2013-03-31', '1/27/13', 'toAdd', 'L&L', 'rhejis', 'kill', 'poolparty', 'subd', 'baba', 'dp', 'httpwww.youtube.comwatchv=DnGdoEa1tPg', '13', '7d', 'j^2', 'qwerty', 'pa', 'Drop Box', 'muzeji', 'kursa darbi', 'exp', 'Pistuve', 'What are you dingo', 'Untitled Album', '20', '11032011', 'hc12', '22', 'idz', '07', '27', 'speķ', 'ss', 'bobball', '18', '17', 'El', '09', 'Wil', 'rage', '02112010', 'q', 'ig', 'li', '25', 'Sig', 'wall_1', 'L', '26082010', 'kin', 'LiLiBalle', 'hood', 'Lien', 'šw', 'rtop', 'sm', '26', 'hāj', 'sv', '15', 't', '7_1', 'sergio martinez hardcore party', 'storm', 'aa', 'happy', '02', 'mo', 'a', '27062010', '27_1', '24_1', 'dl', 'izlaidūmi', 'gewdd', '040120101', '04', 'PBD', 'Din', 'Prikaļi', 'backup', 'fin', 'Bumba', 'Mmm');
+
+$client = new Google_Client();
+$client->setAuthConfig('client_credentials.json');
+$client->setAccessType ("offline");
+$client->setApprovalPrompt ("force");
+$client->setIncludeGrantedScopes(true);
+$client->addScope("https://www.googleapis.com/auth/photoslibrary.readonly");
+
+$accessFile = 'accessToken.json';
+$refreshFile = 'refreshToken.json';
+
+if (file_exists($accessFile)) {
+	$accessToken = json_decode(file_get_contents($accessFile), true);
+	if(isset($accessToken["access_token"]))
+		$accessToken = $accessToken["access_token"];
+	// echo $accessToken;
+	$client->setAccessToken($accessToken);
 }
-
-function showAlbumContent($userId, $albumName)
-{
-    $url = 'http://picasaweb.google.com/data/feed/api/user/' .
-            urlencode($userId) . '/album/' . urlencode($albumName);
-    $xml = curlit($url);
-    $xml = str_replace("xmlns='http://www.w3.org/2005/Atom'", '', $xml);
-
-    $dom = new domdocument;
-    $dom->loadXml($xml);
-    
-    $xpath = new domxpath($dom);
-    $nodes = $xpath->query('//entry');
-	$skaititajs=0;
-    foreach ($nodes as $node) {
-    	$tmp[$skaititajs]['src'] = $xpath->query('.//media:content/@url', $node)->item(0)->textContent;
-    	$tmp[$skaititajs]['iso'] = $xpath->query('.//exif:iso', $node)->item(0)->textContent;
-    	$tmp[$skaititajs]['model'] = $xpath->query('.//exif:model', $node)->item(0)->textContent;
-    	$tmp[$skaititajs]['fstop'] = $xpath->query('.//exif:fstop', $node)->item(0)->textContent;
-    	$tmp[$skaititajs]['exposure'] = $xpath->query('.//exif:exposure', $node)->item(0)->textContent;
-    	$tmp[$skaititajs]['focallength'] = $xpath->query('.//exif:focallength', $node)->item(0)->textContent;
-    	$tmp[$skaititajs]['year'] = date('Y',substr($xpath->query('.//exif:time', $node)->item(0)->textContent, 0, -3));
-    	$tmp[$skaititajs]['month'] = date('n',substr($xpath->query('.//exif:time', $node)->item(0)->textContent, 0, -3));
-    	$tmp[$skaititajs]['weekday'] = date('N',substr($xpath->query('.//exif:time', $node)->item(0)->textContent, 0, -3));
-    	if($xpath->query('.//gml:pos', $node))$tmp[$skaititajs]['position'] = $xpath->query('.//gml:pos', $node)->item(0)->textContent;
-    	$tmp[$skaititajs]['keywords'] = $xpath->query('.//media:keywords', $node)->item(0)->textContent;
-		$skaititajs++;
-    }
-    return $tmp;
+if ($client->isAccessTokenExpired() && file_exists($refreshFile)) {
+	$refreshToken = json_decode(file_get_contents($refreshFile), true);
+	$client->fetchAccessTokenWithRefreshToken($refreshToken);
+	
+	file_put_contents($accessFile, json_encode($client->getAccessToken()));
+	file_put_contents($refreshFile, json_encode($client->getRefreshToken()));
+}else{
+	$authUrl = $client->createAuthUrl();
+	echo $authUrl, "\n";
+	// $code = rtrim(fgets(STDIN));
+	$client->authenticate($code);
+	
+	file_put_contents($accessFile, json_encode($client->getAccessToken()));
+	file_put_contents($refreshFile, json_encode($client->getRefreshToken()));
 }
+$service = new Google_Service_PhotosLibrary($client);
 
-function getAlbums($userId)
-{
-    $url = 'http://picasaweb.google.com/data/feed/api/user/' .
-		urlencode($userId) . '?kind=album';
-	$xml = curlit($url);
-    $xml = str_replace("xmlns='http://www.w3.org/2005/Atom'", '', $xml);
-
-    $dom = new domdocument;
-    $dom->loadXml($xml);
-
-    $xpath = new domxpath($dom);
-    $nodes = $xpath->query('//entry');
-    foreach ($nodes as $node) {
-		$tmp[] = $xpath->query('gphoto:name', $node)->item(0)->textContent;
-    }
-    return $tmp;
-}
-
-//Picasa lietotājvārds
-$userid = 'matiss.tk';
 //Dabū albumu sarakstu
-$albums = getAlbums($userid);
+$optParams = array('pageSize' => '50');
+$results = $service->albums->listAlbums($optParams);
+$albums = array();
+foreach ($results as $album) {
+  $albums[] = array($album['id'], $album['title']);
+}
+
 //iet cauri albumiem
-for ($i=0;$i<sizeof($albums);$i++){
-	$irnav=mysql_query("select album from ratings where album LIKE '$albums[$i]'");
-	if (mysql_num_rows($irnav) == 0 ) {
-		$pictures = showAlbumContent($userid, $albums[$i]);
+for ($i = 0; $i < sizeof($albums); $i++){
+	$albumID 	= $albums[$i][0];
+	$FullTitle 	= $albums[$i][1];
+	if( in_array( $FullTitle, $blacklist ) ) {
+		continue;
+	}
+	$origTitle = $FullTitle;
+	
+	$FullTitle = str_replace('ā','a',$FullTitle);
+	$FullTitle = str_replace('Ā','A',$FullTitle);
+	$FullTitle = str_replace('č','c',$FullTitle);
+	$FullTitle = str_replace('Č','C',$FullTitle);
+	$FullTitle = str_replace('ē','e',$FullTitle);
+	$FullTitle = str_replace('Ē','E',$FullTitle);
+	$FullTitle = str_replace('ģ','g',$FullTitle);
+	$FullTitle = str_replace('Ģ','G',$FullTitle);
+	$FullTitle = str_replace('ī','i',$FullTitle);
+	$FullTitle = str_replace('Ī','I',$FullTitle);
+	$FullTitle = str_replace('ķ','k',$FullTitle);
+	$FullTitle = str_replace('Ķ','K',$FullTitle);
+	$FullTitle = str_replace('ļ','l',$FullTitle);
+	$FullTitle = str_replace('Ļ','L',$FullTitle);
+	$FullTitle = str_replace('ņ','n',$FullTitle);
+	$FullTitle = str_replace('Ņ','N',$FullTitle);
+	$FullTitle = str_replace('š','s',$FullTitle);
+	$FullTitle = str_replace('Š','S',$FullTitle);
+	$FullTitle = str_replace('ū','u',$FullTitle);
+	$FullTitle = str_replace('Ū','U',$FullTitle);
+	$FullTitle = str_replace('ž','z',$FullTitle);
+	$FullTitle = str_replace('Ž','Z',$FullTitle);
+	$FullTitle = str_replace(' ','_',$FullTitle);
+	$FullTitle = mysqli_escape_string($connection, $FullTitle);
+	
+	$irnav = mysqli_query($connection, "select album from ratings where album LIKE '$FullTitle' OR album LIKE '$albumID' OR albumID LIKE '$albumID'");
+	
+	if(mysqli_num_rows($irnav) == 0 ) {
+		$optParams = array('pageSize' => '100');
+		$pictures = showAlbumContent($service, $albumID, $optParams);
+		
+		
 		if(is_array($pictures)){
-			echo "Sākam albumu <b>".$albums[$i]."</b><br/>";
+			echo "Sākam albumu <b>".$albums[$i][1]."</b> (sauksim to par <i>".$FullTitle."</i>)<br/>";
 			//iet cauri bildēm
 			for ($j=0;$j<count($pictures);$j++){
 				//paņem bildes informāciju
@@ -85,33 +113,37 @@ for ($i=0;$i<sizeof($albums);$i++){
 				$year = $pictures[$j]['year'];
 				$month = $pictures[$j]['month'];
 				$weekday = $pictures[$j]['weekday'];
+				$taken = $pictures[$j]['taken'];
 			
 				//pievieno jaunu
-				$result = MYSQL_QUERY("insert into ratings (img, album, iso, model, fstop, exposure, focallength, year, month, day) values('$random_pic', '$albums[$i]', '$iso', '$model', '$fstop', '$exposure', '$focallength', '$year', '$month', '$weekday')");
-				echo $albums[$i]." papildināts ar bildi <img style='height:20px;' src='$random_pic'/><br/>";
-				//pievieno pozīciju, ja ir
-				$position = $pictures[$j]['position'];
-				$coord = explode(" ", $position);
-				if($position!=''){
-						echo $adresz."<br/>";
-						echo $random_pic."<br/>";
-						//ja nav, pievieno
-						$result = MYSQL_QUERY("insert into geo (img, album, lat, lng) values('$random_pic', '$albums[$i]', '$coord[0]', '$coord[1]')");
-						echo $albums[$i]." papildināts ar vietu ".$coord[0].", ".$coord[0]."<br/>";
-				}
-				//pievieno atslēgvārdus
-				$keywords = $pictures[$j]['keywords'];
-				$atslegvardi = explode(",", $keywords);
-				foreach($atslegvardi as $atslegvards){
-				if($atslegvards!=''){
-						$result = MYSQL_QUERY("insert into tags (img, tag) values('$random_pic', '$atslegvards')");
-						echo $albums[$i]." papildināts ar tagu ".$atslegvards."<br/>";
-					}
-				}
+				$result = mysqli_query($connection, "insert into ratings (img, album, albumID, iso, model, fstop, exposure, focallength, year, month, day, taken) values('$random_pic', '$FullTitle', '$albumID', '$iso', '$model', '$fstop', '$exposure', '$focallength', '$year', '$month', '$weekday', '$taken')");
+				echo "Albums <b>".$origTitle."</b> (".$FullTitle.") papildināts ar bildi <img style='height:20px;' src='$random_pic'/><br/>";
 			}
 		}
 	}
 }
 
 echo "<hr/>Gatavs!";
-?>
+
+function showAlbumContent($service, $albumID){
+	$reqq = new Google_Service_PhotosLibrary_SearchMediaItemsRequest();
+	$reqq->setAlbumId($albumID);
+	$albumContent = $service->mediaItems->search($reqq);
+
+	$tmp = array();
+	$skaititajs = 0;
+	foreach($albumContent->mediaItems as $item){
+    	$tmp[$skaititajs]['src'] = $item->baseUrl."=w2048-h1024";
+    	$tmp[$skaititajs]['iso'] = $item->mediaMetadata->photo->isoEquivalent;
+    	$tmp[$skaititajs]['model'] = $item->mediaMetadata->photo->cameraModel;
+    	$tmp[$skaititajs]['fstop'] = $item->mediaMetadata->photo->apertureFNumber;
+    	$tmp[$skaititajs]['exposure'] = $item->mediaMetadata->photo->exposureTime;
+    	$tmp[$skaititajs]['focallength'] = $item->mediaMetadata->photo->focalLength;
+    	$tmp[$skaititajs]['year'] = date('Y', strtotime($item->mediaMetadata->creationTime));
+    	$tmp[$skaititajs]['month'] = date('n', strtotime($item->mediaMetadata->creationTime));
+    	$tmp[$skaititajs]['weekday'] = date('N', strtotime($item->mediaMetadata->creationTime));
+    	$tmp[$skaititajs]['taken'] = date('Y-m-d G:i:s', strtotime($item->mediaMetadata->creationTime));
+		$skaititajs++;
+    }
+    return $tmp;
+}
