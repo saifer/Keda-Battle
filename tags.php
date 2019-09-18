@@ -20,13 +20,13 @@
 require 'includes/tag/classes/wordcloud.class.php';
 include('includes/init_sql.php');
 
-$vardi = mysql_query("SELECT tag from tags");
+$vardi = mysqli_query($connection, "SELECT LTRIM(RTRIM(tag)) as tag from tags");
 
 $cloud = new wordCloud();
 //jāuztaisa vēl, lai, uzklikojot uz kādu ēdienu, atvērtu visus tvītus, kas to pieminējuši...
-while($r=mysql_fetch_array($vardi)){
-	$nom = str_replace(" ", "",$r["tag"]);
-	$cloud->addWord(array('word' => $nom, 'url' => 'vards.php?v='.urlencode($nom)));
+while($r=mysqli_fetch_array($vardi)){
+	// $nom = str_replace(" ", "",$r["tag"]);
+	$cloud->addWord(array('word' => $r["tag"], 'url' => 'vards.php?v='.urlencode($r["tag"])));
 }
 $cloud->orderBy('word','ASC');
 $myCloud = $cloud->showCloud('array');

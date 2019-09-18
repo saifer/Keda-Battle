@@ -47,8 +47,9 @@ if($action <> "get")
 			   last_msg_funtion();
 			}
 		}); 
-		
+
 	});
+
 	</script>
 
 </head>
@@ -56,7 +57,7 @@ if($action <> "get")
 <div style='position: fixed; top: 0; left: 0; width: 50%; height: 813%; background-color: black; z-index: 1;'></div>
 <div style='position: absolute; top: 0; left: 0; z-index: 2; width: 100%;'>
 <h2 style="margin:auto auto;text-align:center;padding:5px;margin-top:20px;background-color:lightgrey;border-radius:15px;width:250px;opacity:0.7">Atslēgvārdi</h2>
-<div style='margin:auto auto;text-align:center;margin-top:15px;padding:5px;background-color:lightgrey;border-radius:15px;opacity:0.99'>
+<div id="contentdiv" style='margin:auto auto;text-align:center;margin-top:15px;padding:5px;background-color:lightgrey;border-radius:15px;opacity:0.99'>
 <br/>
 <?php
 

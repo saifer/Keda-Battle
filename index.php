@@ -1,25 +1,30 @@
 <?php
+header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
 include('includes/init_sql.php');
 
 if(isset($_GET['id'])&&isset($_GET['skatita'])){
 	$bildesID = $_GET['id'];
 	$skatita = $_GET['skatita'];
 	//dabū bildi, par kuru balsots
-	$balsiojumi1 = mysql_query("SELECT * FROM ratings where img LIKE '%$bildesID%'");
-	$r1=mysql_fetch_array($balsiojumi1);
+	$balsiojumi1 = mysqli_query($connection, "SELECT * FROM ratings where img LIKE '%$bildesID%'");
+	$r1=mysqli_fetch_array($balsiojumi1);
 	//palielina bildes balsis un skatījumus
 	$b_balsis=$r1["votes"];
 	$b_skatijumi=$r1["views"];
 		$b_balsis++;
 		$b_skatijumi++;
-		$result = MYSQL_QUERY("update ratings set votes = '$b_balsis',  views = '$b_skatijumi' where img LIKE '%$bildesID%'");
+		$result = mysqli_query($connection, "update ratings set votes = '$b_balsis',  views = '$b_skatijumi' where img LIKE '%$bildesID%'");
 	//dabū otru bildi
-	$balsiojumi1 = mysql_query("SELECT * FROM ratings where img LIKE '%$skatita%'");
-	$r1=mysql_fetch_array($balsiojumi1);
+	$balsiojumi1 = mysqli_query($connection, "SELECT * FROM ratings where img LIKE '%$skatita%'");
+	$r1=mysqli_fetch_array($balsiojumi1);
 	//palielina bildes skatījumus
 	$s_skatijumi=$r1["views"];
 		$s_skatijumi++;
-		$result = MYSQL_QUERY("update ratings set views = '$s_skatijumi' where img LIKE '%$skatita%'");
+		$result = mysqli_query($connection, "update ratings set views = '$s_skatijumi' where img LIKE '%$skatita%'");
 		header('Location: ?');
 }
 ?>
@@ -41,8 +46,8 @@ if(isset($_GET['id'])&&isset($_GET['skatita'])){
 <h2 style="margin:auto auto;text-align:center;padding:5px;background-color:lightgrey;border-radius:15px;width:250px;opacity:0.7">Kura bilde labāka?</h2>
 <div class="gallery" style="margin:auto auto; width:100%;height:100%;">
 <?php
-$query = mysql_query("select * from ratings ORDER BY RAND() LIMIT 2");
-$rrr=mysql_fetch_array($query);
+$query = mysqli_query($connection, "select * from ratings ORDER BY RAND() LIMIT 2");
+$rrr=mysqli_fetch_array($query);
 	$random_pic=$rrr["img"];
 	$rate1=$rrr["votes"];
 	$skatijumi=$rrr["views"];
@@ -55,12 +60,12 @@ $rrr=mysql_fetch_array($query);
 	$year = $rrr['year'];
 	$month = $rrr['month'];
 	$weekday = $rrr['day'];
-	$queryX = mysql_query("select distinct tag from tags where img like '%$random_pic%'");
-	while($rx=mysql_fetch_array($queryX)){
+	$queryX = mysqli_query($connection, "select distinct tag from tags where img like '%$random_pic%'");
+	while($rx=mysqli_fetch_array($queryX)){
 		$tags[]=$rx["tag"];
 	}
 	if (sizeof($tags)<1)$tags[0]="nav";
-$rrr=mysql_fetch_array($query);
+$rrr=mysqli_fetch_array($query);
 	$arandom_pic=$rrr["img"];
 	$rate2=$rrr["votes"];
 	$skatijumi2=$rrr["views"];
@@ -73,8 +78,8 @@ $rrr=mysql_fetch_array($query);
 	$ayear = $rrr['year'];
 	$amonth = $rrr['month'];
 	$aweekday = $rrr['day'];
-	$queryXX = mysql_query("select distinct tag from tags where img like '%$arandom_pic%'");
-	while($rxx=mysql_fetch_array($queryXX)){
+	$queryXX = mysqli_query($connection, "select distinct tag from tags where img like '%$arandom_pic%'");
+	while($rxx=mysqli_fetch_array($queryXX)){
 		$tags1[]=$rxx["tag"];
 	}
 	if (sizeof($tags1)<1)$tags1[0]="nav";
@@ -152,7 +157,11 @@ echo "<a href='?id=".$bildesID2."&skatita=".$bildesID."'><img style='max-height:
 	echo "Uzņemts ar: ".$amodel."<br/>";
 	echo "ISO: ".$aiso."<br/>";
 	echo "Diafragmas atvērums: F".$afstop."<br/>";
-	if($aexposure<1&&$exposure!=0&&$exposure!=""&&isset($exposure)) {$ashspd="1/".(round(1/$aexposure));} else {$ashspd=$aexposure;}
+	if(isset($exposure) && isset($aexposure) && $exposure != "" && $aexposure < 1 && $exposure != 0 && $aexposure != 0) {
+        $ashspd = "1/".(round(1 / $aexposure));
+    } else {
+        $ashspd = $aexposure;
+    }
 	echo "Ekspozīcija: ".$ashspd."s<br/>";
 	echo "fokusa attālums: ".$afocallength."mm<br/>";
 	echo "Gads: ".$ayear."<br/>";
@@ -184,6 +193,22 @@ echo "<a href='?id=".$bildesID2."&skatita=".$bildesID."'><img style='max-height:
 	echo "</div>";
 ?>
 </div>
+<script language = "JavaScript">
+
+document.addEventListener("keydown", keyDownTextField, false);
+
+function keyDownTextField(e) {
+  var keyCode = e.keyCode;
+  switch(keyCode){
+		case 37:
+			window.location.href = "index.php?id=<?php echo $bildesID;?>&skatita=<?php echo $bildesID2;?>";
+			break;
+		case 39:
+			window.location.href = "index.php?id=<?php echo $bildesID2;?>&skatita=<?php echo $bildesID;?>";
+			break;
+	} 
+}
+</script>
 <br style="clear:both;"/>
 <div style="position: fixed; bottom: 0px;  margin: auto auto; width:100%;background-color:lightgrey;text-align:center; opacity:0.85;">
 <a style="color:black; font-weight:bold; text-decoration:none;" href="index.php">Sākums</a> | 
