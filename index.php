@@ -42,7 +42,7 @@ if ($client->isAccessTokenExpired() && file_exists($refreshFile)) {
 	file_put_contents($refreshFile, json_encode($client->getRefreshToken()));
 }
 
-if(isset($_GET['id'])&&isset($_GET['skatita'])){
+if(isset($_GET['id']) && isset($_GET['skatita'])){
 	$bildesID = $_GET['id'];
 	$skatita = $_GET['skatita'];
 	//dabū bildi, par kuru balsots
@@ -84,42 +84,44 @@ if(isset($_GET['id'])&&isset($_GET['skatita'])){
 <div class="gallery" style="margin:auto auto; width:100%;height:100%;">
 <?php
 $query = mysqli_query($connection, "select * from ratings ORDER BY RAND() LIMIT 2");
-$rrr=mysqli_fetch_array($query);
-	$random_pic=$rrr["img"];
-	$rate1=$rrr["votes"];
-	$skatijumi=$rrr["views"];
-	$album_title=$rrr["album"];
-	$model = $rrr['model'];
-	$iso = $rrr['iso'];
-	$fstop = $rrr['fstop'];
-	$exposure = $rrr['exposure'];
-	$focallength = $rrr['focallength'];
-	$year = $rrr['year'];
-	$month = $rrr['month'];
-	$weekday = $rrr['day'];
-	$queryX = mysqli_query($connection, "select distinct tag from tags where img like '%$random_pic%'");
-	while($rx=mysqli_fetch_array($queryX)){
-		$tags[]=$rx["tag"];
-	}
-	if (sizeof($tags)<1)$tags[0]="nav";
-$rrr=mysqli_fetch_array($query);
-	$arandom_pic=$rrr["img"];
-	$rate2=$rrr["votes"];
-	$skatijumi2=$rrr["views"];
-	$aalbum_title=$rrr["album"];
-	$amodel = $rrr['model'];
-	$aiso = $rrr['iso'];
-	$afstop = $rrr['fstop'];
-	$aexposure = $rrr['exposure'];
-	$afocallength = $rrr['focallength'];
-	$ayear = $rrr['year'];
-	$amonth = $rrr['month'];
-	$aweekday = $rrr['day'];
-	$queryXX = mysqli_query($connection, "select distinct tag from tags where img like '%$arandom_pic%'");
-	while($rxx=mysqli_fetch_array($queryXX)){
-		$tags1[]=$rxx["tag"];
-	}
-	if (sizeof($tags1)<1)$tags1[0]="nav";
+
+$rezultats1     = mysqli_fetch_array($query);
+$random_pic     = $rezultats1["img"];
+$rate1          = $rezultats1["votes"];
+$skatijumi      = $rezultats1["views"];
+$album_title    = $rezultats1["album"];
+$model          = $rezultats1['model'];
+$iso            = $rezultats1['iso'];
+$fstop          = $rezultats1['fstop'];
+$exposure       = $rezultats1['exposure'];
+$focallength    = $rezultats1['focallength'];
+$year           = $rezultats1['year'];
+$month          = $rezultats1['month'];
+$weekday        = $rezultats1['day'];
+$queryX         = mysqli_query($connection, "select distinct tag from tags where img like '%$random_pic%'");
+while($rx = mysqli_fetch_array($queryX)){
+    $tags[] = $rx["tag"];
+}
+if (sizeof($tags)<1)$tags[0]="nav";
+    
+$rezultats2     = mysqli_fetch_array($query);
+$arandom_pic    = $rezultats2["img"];
+$rate2          = $rezultats2["votes"];
+$skatijumi2     = $rezultats2["views"];
+$aalbum_title   = $rezultats2["album"];
+$amodel         = $rezultats2['model'];
+$aiso           = $rezultats2['iso'];
+$afstop         = $rezultats2['fstop'];
+$aexposure      = $rezultats2['exposure'];
+$afocallength   = $rezultats2['focallength'];
+$ayear          = $rezultats2['year'];
+$amonth         = $rezultats2['month'];
+$aweekday       = $rezultats2['day'];
+$queryXX        = mysqli_query($connection, "select distinct tag from tags where img like '%$arandom_pic%'");
+while($rxx = mysqli_fetch_array($queryXX)){
+    $tags1[] = $rxx["tag"];
+}
+if (sizeof($tags1)<1)$tags1[0]="nav";
 
 //izskaitļo bildes ID
 $bb = explode("/", $random_pic);
