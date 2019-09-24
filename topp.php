@@ -14,40 +14,41 @@
 <div style='position: absolute; top: 0; left: 0; z-index: 2; width: 100%;'>
 <br/>
 <h2 style="margin:auto auto;text-align:center;padding:5px;background-color:lightgrey;border-radius:15px;width:250px;opacity:0.7">Bildes</h2>
-<h2 style="float:left;text-align:center;padding:5px;margin-left:12%;background-color:lightgrey;border-radius:15px;width:250px;opacity:0.7">Zemākais reitings</h2>
-<h2 style="float:right;text-align:center;padding:5px;margin-right:12%;background-color:lightgrey;border-radius:15px;width:250px;opacity:0.7">Augstākais reitings</h2>
+<h2 style="float:left;text-align:center;padding:5px;margin-left:12%;background-color:lightgrey;border-radius:15px;width:25%;opacity:0.7">Visvairāk balsu</h2>
+<h2 style="float:right;text-align:center;padding:5px;margin-right:12%;background-color:lightgrey;border-radius:15px;width:25%;opacity:0.7">Augstākais reitings</h2>
+<br style="clear:both;"/>
 <div class="gallery">
-<div style="width:49%;float:left;">
+<div style="width:50%;float:left;">
 <?php
 include('includes/init_sql.php');
 //zemākās
 
-$balsiojumi1 = mysql_query("SELECT img, album, votes, (votes/views) rating FROM ratings where (votes/views) > 0 ORDER BY rating ASC, votes ASC LIMIT 0 , 10");
-while($r1=mysql_fetch_array($balsiojumi1)){
+$balsiojumi1 = mysqli_query($connection, "SELECT img, album, votes, (votes/views) rating FROM ratings where (votes/views) > 0 ORDER BY votes DESC LIMIT 0 , 10");
+while($r1=mysqli_fetch_array($balsiojumi1)){
 	$url=$r1["img"];
 	$balsis=$r1["rating"];
 	$albumID=$r1["album"];
 	$votes=$r1["votes"];
-	echo '<div style="margin:15px;display:bolck;">
+	echo '<div style="display:bolck;">
 	<a target="_blank" href="http://lielakeda.lv/?album='.$albumID.'">
-	<img style="width:95%;border-radius:25px;" src="'.$url.'"/></a><br/>';
+	<img style="float:left;width:95%;border-radius:25px;" src="'.preg_replace("~\/(?!.*\/)~", "/s2048/", $url).'"/></a><br/>';
 	echo '<span style="padding:15px;color:white;">Reitings: '.round($balsis, 2).' ('.$votes.' balsis)</span></div>';
 }
 
 ?>
-</div><div style="width:49%;float:right;">
+</div><div style="width:50%;float:right;">
 <?php
 //augstākās
 
-$balsiojumi1 = mysql_query("SELECT img, album, votes, (votes/views) rating FROM ratings where (votes/views) > 0 and votes>1 ORDER BY rating DESC, votes DESC LIMIT 0 , 10");
-while($r1=mysql_fetch_array($balsiojumi1)){
+$balsiojumi1 = mysqli_query($connection, "SELECT img, album, votes, (votes/views) rating FROM ratings where (votes/views) > 0 and votes>1 ORDER BY rating DESC, votes DESC LIMIT 0 , 10");
+while($r1=mysqli_fetch_array($balsiojumi1)){
 	$url=$r1["img"];
 	$balsis=$r1["rating"];
 	$albumID=$r1["album"];
 	$votes=$r1["votes"];
-	echo '<div style="padding:15px;display:bolck;">
+	echo '<div style="display:bolck;">
 	<a target="_blank" href="http://lielakeda.lv/?album='.$albumID.'">
-	<img style="width:95%;border-radius:25px;" src="'.$url.'"/></a><br/>';
+	<img style="float:right;width:95%;border-radius:25px;" src="'.preg_replace("~\/(?!.*\/)~", "/s2048/", $url).'"/></a><br/>';
 	echo '<span style="padding:15px;color:black;">Reitings: '.round($balsis, 2).' ('.$votes.' balsis)</span></div>';
 }
 ?>

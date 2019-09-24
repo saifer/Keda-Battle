@@ -1,38 +1,80 @@
 <?php
+header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
 include('includes/init_sql.php');
 
-if(isset($_GET['id'])&&isset($_GET['skatita'])){
+//TO-DO: Iznest šo bloku ārpusē, jo to nākas bieži izmantot atkārtoti
+require_once 'get/vendor/autoload.php';
+
+$client = new Google_Client();
+$client->setAuthConfig('get/client_credentials.json');
+$client->setAccessType ("offline");
+$client->setApprovalPrompt ("force");
+$client->setIncludeGrantedScopes(true);
+$client->addScope("https://www.googleapis.com/auth/photoslibrary.readonly");
+
+$accessFile = 'get/accessToken.json';
+$refreshFile = 'get/refreshToken.json';
+
+if (file_exists($accessFile)) {
+	$accessToken = json_decode(file_get_contents($accessFile), true);
+	if(isset($accessToken["access_token"]))
+		$accessToken = $accessToken["access_token"];
+	// echo $accessToken;
+	$client->setAccessToken($accessToken);
+}
+if ($client->isAccessTokenExpired() && file_exists($refreshFile)) {
+	$refreshToken = json_decode(file_get_contents($refreshFile), true);
+	$client->fetchAccessTokenWithRefreshToken($refreshToken);
+	
+	file_put_contents($accessFile, json_encode($client->getAccessToken()));
+	file_put_contents($refreshFile, json_encode($client->getRefreshToken()));
+}else{
+	$authUrl = $client->createAuthUrl();
+	echo $authUrl, "\n";
+	// $code = rtrim(fgets(STDIN));
+	$client->authenticate($code);
+	
+	file_put_contents($accessFile, json_encode($client->getAccessToken()));
+	file_put_contents($refreshFile, json_encode($client->getRefreshToken()));
+}
+
+if(isset($_GET['id']) && isset($_GET['skatita'])){
 	$bildesID = $_GET['id'];
 	$skatita = $_GET['skatita'];
 	//dabū bildi, par kuru balsots
-	$balsiojumi1 = mysql_query("SELECT * FROM ratings where img LIKE '%$bildesID%'");
-	$r1=mysql_fetch_array($balsiojumi1);
+	$balsiojumi1 = mysqli_query($connection, "SELECT * FROM ratings where img LIKE '%$bildesID%'");
+	$r1=mysqli_fetch_array($balsiojumi1);
 	//palielina bildes balsis un skatījumus
 	$b_balsis=$r1["votes"];
 	$b_skatijumi=$r1["views"];
 		$b_balsis++;
 		$b_skatijumi++;
-		$result = MYSQL_QUERY("update ratings set votes = '$b_balsis',  views = '$b_skatijumi' where img LIKE '%$bildesID%'");
+		$result = mysqli_query($connection, "update ratings set votes = '$b_balsis',  views = '$b_skatijumi' where img LIKE '%$bildesID%'");
 	//dabū otru bildi
-	$balsiojumi1 = mysql_query("SELECT * FROM ratings where img LIKE '%$skatita%'");
-	$r1=mysql_fetch_array($balsiojumi1);
+	$balsiojumi1 = mysqli_query($connection, "SELECT * FROM ratings where img LIKE '%$skatita%'");
+	$r1=mysqli_fetch_array($balsiojumi1);
 	//palielina bildes skatījumus
 	$s_skatijumi=$r1["views"];
 		$s_skatijumi++;
-		$result = MYSQL_QUERY("update ratings set views = '$s_skatijumi' where img LIKE '%$skatita%'");
+		$result = mysqli_query($connection, "update ratings set views = '$s_skatijumi' where img LIKE '%$skatita%'");
 		header('Location: ?');
 }
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="lv" lang="lv">
 <head>
-<title>Kedas cīņa</title>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<meta name="description" content="Salīdzini Kedas bildes!"/>
-<meta name="keywords" content="Keda, foto, attēli, salīdzinājums"/>
-<meta name="author" content="Matīss Rikters"/>
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-<link rel="stylesheet" type="text/css" href="includes/style.css">
+    <title>Kedas cīņa</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta name="description" content="Salīdzini Kedas bildes!"/>
+    <meta name="keywords" content="Keda, foto, attēli, salīdzinājums"/>
+    <meta name="author" content="Matīss Rikters"/>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="includes/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 </head>
 <body style='margin: 0px; height: 100%;'>
 <div style='position: fixed; top: 0; left: 0; width: 50%; height: 400%; background-color: black; z-index: 1;'></div>
@@ -41,43 +83,45 @@ if(isset($_GET['id'])&&isset($_GET['skatita'])){
 <h2 style="margin:auto auto;text-align:center;padding:5px;background-color:lightgrey;border-radius:15px;width:250px;opacity:0.7">Kura bilde labāka?</h2>
 <div class="gallery" style="margin:auto auto; width:100%;height:100%;">
 <?php
-$query = mysql_query("select * from ratings ORDER BY RAND() LIMIT 2");
-$rrr=mysql_fetch_array($query);
-	$random_pic=$rrr["img"];
-	$rate1=$rrr["votes"];
-	$skatijumi=$rrr["views"];
-	$album_title=$rrr["album"];
-	$model = $rrr['model'];
-	$iso = $rrr['iso'];
-	$fstop = $rrr['fstop'];
-	$exposure = $rrr['exposure'];
-	$focallength = $rrr['focallength'];
-	$year = $rrr['year'];
-	$month = $rrr['month'];
-	$weekday = $rrr['day'];
-	$queryX = mysql_query("select distinct tag from tags where img like '%$random_pic%'");
-	while($rx=mysql_fetch_array($queryX)){
-		$tags[]=$rx["tag"];
-	}
-	if (sizeof($tags)<1)$tags[0]="nav";
-$rrr=mysql_fetch_array($query);
-	$arandom_pic=$rrr["img"];
-	$rate2=$rrr["votes"];
-	$skatijumi2=$rrr["views"];
-	$aalbum_title=$rrr["album"];
-	$amodel = $rrr['model'];
-	$aiso = $rrr['iso'];
-	$afstop = $rrr['fstop'];
-	$aexposure = $rrr['exposure'];
-	$afocallength = $rrr['focallength'];
-	$ayear = $rrr['year'];
-	$amonth = $rrr['month'];
-	$aweekday = $rrr['day'];
-	$queryXX = mysql_query("select distinct tag from tags where img like '%$arandom_pic%'");
-	while($rxx=mysql_fetch_array($queryXX)){
-		$tags1[]=$rxx["tag"];
-	}
-	if (sizeof($tags1)<1)$tags1[0]="nav";
+$query = mysqli_query($connection, "select * from ratings ORDER BY RAND() LIMIT 2");
+
+$rezultats1     = mysqli_fetch_array($query);
+$random_pic     = $rezultats1["img"];
+$rate1          = $rezultats1["votes"];
+$skatijumi      = $rezultats1["views"];
+$album_title    = $rezultats1["album"];
+$model          = $rezultats1['model'];
+$iso            = $rezultats1['iso'];
+$fstop          = $rezultats1['fstop'];
+$exposure       = $rezultats1['exposure'];
+$focallength    = $rezultats1['focallength'];
+$year           = $rezultats1['year'];
+$month          = $rezultats1['month'];
+$weekday        = $rezultats1['day'];
+$queryX         = mysqli_query($connection, "select distinct tag from tags where img like '%$random_pic%'");
+while($rx = mysqli_fetch_array($queryX)){
+    $tags[] = $rx["tag"];
+}
+if (sizeof($tags)<1)$tags[0]="nav";
+    
+$rezultats2     = mysqli_fetch_array($query);
+$arandom_pic    = $rezultats2["img"];
+$rate2          = $rezultats2["votes"];
+$skatijumi2     = $rezultats2["views"];
+$aalbum_title   = $rezultats2["album"];
+$amodel         = $rezultats2['model'];
+$aiso           = $rezultats2['iso'];
+$afstop         = $rezultats2['fstop'];
+$aexposure      = $rezultats2['exposure'];
+$afocallength   = $rezultats2['focallength'];
+$ayear          = $rezultats2['year'];
+$amonth         = $rezultats2['month'];
+$aweekday       = $rezultats2['day'];
+$queryXX        = mysqli_query($connection, "select distinct tag from tags where img like '%$arandom_pic%'");
+while($rxx = mysqli_fetch_array($queryXX)){
+    $tags1[] = $rxx["tag"];
+}
+if (sizeof($tags1)<1)$tags1[0]="nav";
 
 //izskaitļo bildes ID
 $bb = explode("/", $random_pic);
@@ -94,12 +138,39 @@ $aa2 = explode("/", $bildesID2);
 for ($i=0; $i<sizeof($aa)-1; $i++){$aaa1.=$aa[$i]."/";if($i==sizeof($aa)-2){$aaa1.="s2000/";};}
 for ($i=0; $i<sizeof($aa2)-1; $i++){$aaa2.=$aa2[$i]."/";if($i==sizeof($aa2)-2){$aaa2.="s2000/";};}
 
-echo "<a href='?id=".$bildesID."&skatita=".$bildesID2."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:left;' src='".$aaa1."' ></a>";
-echo "<a href='?id=".$bildesID2."&skatita=".$bildesID."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:right;' src='".$aaa2."' ></a><br style='clear:both;'/>";
+//Pirmā bilde
+if(substr($arandom_pic, 0, 4) == "http"){
+    //Jāpārbauda arī otra (lai pareizi skaitītu...)
+    if(substr($random_pic, 0, 4) !== "http"){
+        $bildesID = $random_pic;
+    }
+    //TO-DO: Pārbaudīt, vai arī ar tastarūras pogām lietas strādā...
+    echo "<a href='?id=".$arandom_pic."&skatita=".$bildesID."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:left;' src='".$aaa2."' ></a>";
+}else{    
+    if(substr($random_pic, 0, 4) !== "http"){
+        $bildesID = $random_pic;
+    }
+    echo "<a href='?id=".$arandom_pic."&skatita=".$bildesID."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:left;' onload='(function(){var imgElement = this; var jsonURL=\"https://photoslibrary.googleapis.com/v1/mediaItems/".$arandom_pic."?access_token=".$accessToken."\"; $.getJSON(jsonURL, function(data) { var imgURL = data.baseUrl+\"=w2000\"; imgElement.src=imgURL; }); }).call(this)' src='includes/bigLoader.gif'/></a>";
+}
+
+
+//Otrā bilde
+if(substr($random_pic, 0, 4) == "http"){
+    //Jāpārbauda arī otra (lai pareizi skaitītu...)
+    if(substr($arandom_pic, 0, 4) !== "http"){
+        $bildesID = $arandom_pic;
+    }
+    echo "<a href='?id=".$random_pic."&skatita=".$bildesID."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:right;' src='".$aaa1."' ></a><br style='clear:both;'/>";
+}else{
+    if(substr($arandom_pic, 0, 4) !== "http"){
+        $bildesID = $arandom_pic;
+    }
+    echo "<a href='?id=".$random_pic."&skatita=".$bildesID."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:right;' onload='(function(){var imgElement = this; var jsonURL=\"https://photoslibrary.googleapis.com/v1/mediaItems/".$random_pic."?access_token=".$accessToken."\"; $.getJSON(jsonURL, function(data) { var imgURL = data.baseUrl+\"=w2000\"; imgElement.src=imgURL; }); }).call(this)' src='includes/bigLoader.gif'/></a><br style='clear:both;'/>";
+}
 
 	echo "<div style='float:left;width:40%;padding:15px;color:white;border:1px lightgrey solid;border-radius:15px;margin:15px;'>";
-	echo 'Saite uz bildi:<br/>';
-	echo '<input type="text" size="60" value="'.$aaa1.'"  readonly="readonly" /><br/><br/>';
+	// echo 'Saite uz bildi:<br/>';
+	// echo '<input type="text" size="60" value="'.$aaa1.'"  readonly="readonly" /><br/><br/>';
 	echo "<b>Par bildi:</b><br/>";
 	if($skatijumi>0){echo "Reitings: ".$rate1/$skatijumi."<br/>";}else{echo "Reitings: vēl nav<br/>";}
 	echo "Balsis: ".$rate1."<br/>";
@@ -141,8 +212,8 @@ echo "<a href='?id=".$bildesID2."&skatita=".$bildesID."'><img style='max-height:
 	echo "</div>";
 
 	echo "<div style='float:right;width:40%;padding:15px;border:1px lightgrey solid;border-radius:15px;margin:15px;'>";
-	echo 'Saite uz bildi:<br/>';
-	echo '<input type="text" size="60" value="'.$aaa2.'"  readonly="readonly" /><br/><br/>';
+	// echo 'Saite uz bildi:<br/>';
+	// echo '<input type="text" size="60" value="'.$aaa2.'"  readonly="readonly" /><br/><br/>';
 	echo "<b>Par bildi:</b><br/>";
 	if($skatijumi2>0){echo "Reitings: ".$rate2/$skatijumi2."<br/>";}else{echo "Reitings: vēl nav<br/>";}
 	echo "Balsis: ".$rate2."<br/>";
@@ -152,7 +223,11 @@ echo "<a href='?id=".$bildesID2."&skatita=".$bildesID."'><img style='max-height:
 	echo "Uzņemts ar: ".$amodel."<br/>";
 	echo "ISO: ".$aiso."<br/>";
 	echo "Diafragmas atvērums: F".$afstop."<br/>";
-	if($aexposure<1&&$exposure!=0&&$exposure!=""&&isset($exposure)) {$ashspd="1/".(round(1/$aexposure));} else {$ashspd=$aexposure;}
+	if(isset($exposure) && isset($aexposure) && $exposure != "" && $aexposure < 1 && $exposure != 0 && $aexposure != 0) {
+        $ashspd = "1/".(round(1 / $aexposure));
+    } else {
+        $ashspd = $aexposure;
+    }
 	echo "Ekspozīcija: ".$ashspd."s<br/>";
 	echo "fokusa attālums: ".$afocallength."mm<br/>";
 	echo "Gads: ".$ayear."<br/>";
@@ -184,6 +259,22 @@ echo "<a href='?id=".$bildesID2."&skatita=".$bildesID."'><img style='max-height:
 	echo "</div>";
 ?>
 </div>
+<script language = "JavaScript">
+
+document.addEventListener("keydown", keyDownTextField, false);
+
+function keyDownTextField(e) {
+  var keyCode = e.keyCode;
+  switch(keyCode){
+		case 37:
+			window.location.href = "index.php?id=<?php echo $bildesID;?>&skatita=<?php echo $bildesID2;?>";
+			break;
+		case 39:
+			window.location.href = "index.php?id=<?php echo $bildesID2;?>&skatita=<?php echo $bildesID;?>";
+			break;
+	} 
+}
+</script>
 <br style="clear:both;"/>
 <div style="position: fixed; bottom: 0px;  margin: auto auto; width:100%;background-color:lightgrey;text-align:center; opacity:0.85;">
 <a style="color:black; font-weight:bold; text-decoration:none;" href="index.php">Sākums</a> | 
