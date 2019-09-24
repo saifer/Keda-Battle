@@ -136,27 +136,29 @@ $aa2 = explode("/", $bildesID2);
 for ($i=0; $i<sizeof($aa)-1; $i++){$aaa1.=$aa[$i]."/";if($i==sizeof($aa)-2){$aaa1.="s2000/";};}
 for ($i=0; $i<sizeof($aa2)-1; $i++){$aaa2.=$aa2[$i]."/";if($i==sizeof($aa2)-2){$aaa2.="s2000/";};}
 
-//Jaunās bildes...
+//Pirmā bilde
 if(substr($arandom_pic, 0, 4) == "http"){
     //Jāpārbauda arī otra (lai pareizi skaitītu...)
     if(substr($random_pic, 0, 4) !== "http"){
-        $bildesID2 = $random_pic;
+        $bildesID = $random_pic;
     }
     //TO-DO: Pārbaudīt, vai arī ar tastarūras pogām lietas strādā...
-    echo "<a href='?id=".$bildesID."&skatita=".$bildesID2."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:left;' src='".$aaa1."' ></a>";
-}else{
+    echo "<a href='?id=".$arandom_pic."&skatita=".$bildesID."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:left;' src='".$aaa2."' ></a>";
+}else{    
     if(substr($random_pic, 0, 4) !== "http"){
-        $bildesID2 = $random_pic;
+        $bildesID = $random_pic;
     }
-    echo "<a href='?id=".$arandom_pic."&skatita=".$bildesID2."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:left;' onload='(function(){var imgElement = this; var jsonURL=\"https://photoslibrary.googleapis.com/v1/mediaItems/".$arandom_pic."?access_token=".$accessToken."\"; $.getJSON(jsonURL, function(data) { var imgURL = data.baseUrl+\"=w2000\"; imgElement.src=imgURL; }); }).call(this)' src='includes/bigLoader.gif'/></a>";
+    echo "<a href='?id=".$arandom_pic."&skatita=".$bildesID."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:left;' onload='(function(){var imgElement = this; var jsonURL=\"https://photoslibrary.googleapis.com/v1/mediaItems/".$arandom_pic."?access_token=".$accessToken."\"; $.getJSON(jsonURL, function(data) { var imgURL = data.baseUrl+\"=w2000\"; imgElement.src=imgURL; }); }).call(this)' src='includes/bigLoader.gif'/></a>";
 }
-//Jaunās bildes...
+
+
+//Otrā bilde
 if(substr($random_pic, 0, 4) == "http"){
     //Jāpārbauda arī otra (lai pareizi skaitītu...)
     if(substr($arandom_pic, 0, 4) !== "http"){
         $bildesID = $arandom_pic;
     }
-    echo "<a href='?id=".$bildesID2."&skatita=".$bildesID."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:right;' src='".$aaa2."' ></a><br style='clear:both;'/>";
+    echo "<a href='?id=".$random_pic."&skatita=".$bildesID."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:right;' src='".$aaa1."' ></a><br style='clear:both;'/>";
 }else{
     if(substr($arandom_pic, 0, 4) !== "http"){
         $bildesID = $arandom_pic;
