@@ -10,6 +10,40 @@ $db_database = "baumuin_battle";
 $connection = mysqli_connect($db_server, $db_user, $db_password, $db_database);
 mysqli_set_charset($connection, "utf8");
 session_start();
+require_once 'get/vendor/autoload.php';
+
+$client = new Google_Client();
+$client->setAuthConfig('get/client_credentials.json');
+$client->setAccessType ("offline");
+$client->setApprovalPrompt ("force");
+$client->setIncludeGrantedScopes(true);
+$client->addScope("https://www.googleapis.com/auth/photoslibrary.readonly");
+
+$accessFile = 'get/accessToken.json';
+$refreshFile = 'get/refreshToken.json';
+
+if (file_exists($accessFile)) {
+	$accessToken = json_decode(file_get_contents($accessFile), true);
+	if(isset($accessToken["access_token"]))
+		$accessToken = $accessToken["access_token"];
+	// echo $accessToken;
+	$client->setAccessToken($accessToken);
+}
+if ($client->isAccessTokenExpired() && file_exists($refreshFile)) {
+	$refreshToken = json_decode(file_get_contents($refreshFile), true);
+	$client->fetchAccessTokenWithRefreshToken($refreshToken);
+	
+	file_put_contents($accessFile, json_encode($client->getAccessToken()));
+	file_put_contents($refreshFile, json_encode($client->getRefreshToken()));
+}else{
+	$authUrl = $client->createAuthUrl();
+	echo $authUrl, "\n";
+	// $code = rtrim(fgets(STDIN));
+	$client->authenticate($code);
+	
+	file_put_contents($accessFile, json_encode($client->getAccessToken()));
+	file_put_contents($refreshFile, json_encode($client->getRefreshToken()));
+}
 
 //saglabāsim datubāzē
 if (isset($_POST['submit'])){
@@ -57,7 +91,7 @@ if (isset($_POST['submit'])){
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Simple Map</title>
+    <title>Add Geo Location</title>
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
     <style>
@@ -73,6 +107,7 @@ if (isset($_POST['submit'])){
         padding: 0;
       }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   </head>
   <body>
     <div id="map" style="height: 600px; width: 590px; float: right; margin:20px;"></div>
@@ -193,7 +228,12 @@ if (isset($_POST['submit'])){
             }
             
             echo "<tr>";
-            echo "<td style='background-color: #".$color."' >".$album."</td><td><img style='height:100px;' src='".$img."' />";
+            echo "<td style='background-color: #".$color."' >".$album."</td><td>";
+            if(substr($img, 0, 4) == "http"){
+                echo "<img style='height:100px;' src='".$img."' />";
+            }else{
+                echo "<img style='height:100px;' onload='(function(){var imgElement = this; var jsonURL=\"https://photoslibrary.googleapis.com/v1/mediaItems/".$img."?access_token=".$accessToken."\"; $.getJSON(jsonURL, function(data) { var imgURL = data.baseUrl+\"=w2000\"; imgElement.src=imgURL; }); }).call(this)' src='includes/bigLoader.gif'/>";
+            }
             echo "<input type='hidden' name='img-".$Id."' id='img-".$Id."' value='".$img."'>";
             echo "<input type='hidden' name='album-".$Id."' id='album-".$Id."' value='".$album."'>";
             echo "</td>";
