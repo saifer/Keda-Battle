@@ -110,7 +110,15 @@ if (isset($_POST['submit'])){
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   </head>
   <body>
-    <div id="map" style="height: 600px; width: 590px; float: right; margin:20px;"></div>
+    <div style="float: right; ">
+        <div id="map" style="height: 600px; width: 590px; margin:20px;"></div>
+        <div style="margin:20px;">
+            <input style='display:inline;' type='button' onclick='move(35.6804, 139.7690);' value='Tokija'>
+            <input style='display:inline;' type='button' onclick='move(56.9697, 23.1532);' value='Tukums'>
+            <input style='display:inline;' type='button' onclick='move(56.9496, 24.1052);' value='Rīga'>
+            <input style='display:inline;' type='button' onclick='move(22.3193, 114.1694);' value='Honkonga'>
+        </div>
+    </div>
     <script>
       var map;
 	  var marker;
@@ -124,6 +132,10 @@ if (isset($_POST['submit'])){
         
         latElementTrg.value = latElementSrc.value;
         lngElementTrg.value = lngElementSrc.value;
+      }
+      function move(latElement, lngElement) {		
+		marker.setPosition( new google.maps.LatLng( latElement, lngElement ) );
+		map.panTo( new google.maps.LatLng( latElement, lngElement ) );
       }
       function set(id) {
         latElement = document.getElementsByName('lat-'+id)[0];

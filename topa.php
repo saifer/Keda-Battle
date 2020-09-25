@@ -6,7 +6,7 @@
 <meta name="description" content="Salīdzini Kedas bildes!"/>
 <meta name="keywords" content="Keda, foto, attēli, salīdzinājums"/>
 <meta name="author" content="Matīss Rikters"/>
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
 <link rel="stylesheet" type="text/css" href="includes/style.css">
 </head>
 <body style='margin: 0px; height: 100%;'>
@@ -24,15 +24,16 @@ include('includes/init_sql.php');
 // visvairāk balsu
 // $balsiojumi1 = mysqli_query($connection, "SELECT distinct album, (sum(votes)/sum(views)) skaits, sum(votes) bals, img FROM `ratings` where votes>0 and views>0 group by album ORDER BY bals desc limit 0, 10");
 // augstākaie, ņemot vērā bilžu skaitu albumā
-$balsiojumi1 = mysqli_query($connection, "SELECT distinct album, (sum(votes)/sum(views)) skaits, sum(votes) bals, img, ((sum(votes)/sum(views))/count(img)) as izlidzinats FROM `ratings` where votes>0 and views>0 group by album ORDER BY izlidzinats desc, bals desc limit 0, 10");
+$balsiojumi1 = mysqli_query($connection, "SELECT distinct album, albumID, (sum(votes)/sum(views)) skaits, sum(votes) bals, img, ((sum(votes)/sum(views))/count(img)) as izlidzinats FROM `ratings` where votes>0 and views>0 group by album ORDER BY izlidzinats desc, bals desc limit 0, 10");
 
 while($r1=mysqli_fetch_array($balsiojumi1)){
 	$url=$r1["img"];
 	$balsis=$r1["skaits"];
 	$albumID=$r1["album"];
+	$album_ID=$r1["albumID"];
 	$votes=$r1["bals"];
 	echo '<div style="display:bolck;">
-	<a target="_blank" href="http://lielakeda.lv/?album='.$albumID.'">
+	<a target="_blank" href="http://lielakeda.lv/albums/?cws_album='.$album_ID.'&cws_album_title='.$albumID.'">
 	<img style="float:left;width:95%;border-radius:25px;" src="'.preg_replace("~\/(?!.*\/)~", "/s2048/", $url).'"/></a><br/>';
 	echo '<span style="padding:15px;color:white;">Albums - <b>'.$albumID.'</b>, reitings: '.round($balsis, 2).' ('.$votes.' balsis)</span></div>';
 }
@@ -42,14 +43,15 @@ while($r1=mysqli_fetch_array($balsiojumi1)){
 <?php
 //augstākie
 
-$balsiojumi1 = mysqli_query($connection, "SELECT distinct album, (sum(votes)/sum(views)) skaits, sum(votes) bals, img FROM `ratings` where votes>0 and views>0 group by album ORDER BY skaits desc, bals desc limit 0, 10");
+$balsiojumi1 = mysqli_query($connection, "SELECT distinct album, albumID, (sum(votes)/sum(views)) skaits, sum(votes) bals, img FROM `ratings` where votes>0 and views>0 group by album ORDER BY skaits desc, bals desc limit 0, 10");
 while($r1=mysqli_fetch_array($balsiojumi1)){
 	$url=$r1["img"];
 	$balsis=$r1["skaits"];
 	$albumID=$r1["album"];
+	$album_ID=$r1["albumID"];
 	$votes=$r1["bals"];
 	echo '<div style="display:bolck;">
-	<a target="_blank" href="http://lielakeda.lv/?album='.$albumID.'">
+	<a target="_blank" href="http://lielakeda.lv/albums/?cws_album='.$album_ID.'&cws_album_title='.$albumID.'">
 	<img style="float:right;width:95%;border-radius:25px;" src="'.preg_replace("~\/(?!.*\/)~", "/s2048/", $url).'"/></a><br/>';
 	echo '<span style="padding:15px;color:black;">Albums - <b>'.$albumID.'</b>, reitings: '.round($balsis, 2).' ('.$votes.' balsis)</span></div>';
 }

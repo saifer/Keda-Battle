@@ -6,7 +6,7 @@
 <meta name="description" content="Salīdzini Kedas bildes!"/>
 <meta name="keywords" content="Keda, foto, attēli, salīdzinājums"/>
 <meta name="author" content="Matīss Rikters"/>
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
 <link rel="stylesheet" type="text/css" href="includes/style.css">
 </head>
 <body style='margin: 0px; height: 100%;'>
@@ -75,7 +75,7 @@ while($r1=mysqli_fetch_array($kopskaits)){
 ?>
 <h2 style="margin:auto auto;text-align:center;padding:5px;background-color:lightgrey;border-radius:15px;width:250px;opacity:0.7">Karte</h2>
 <div style="margin:auto auto;padding:5px;padding-left:20px;background-color:lightgrey;border-radius:15px;width:80%;opacity:0.99;margin-top:20px;">
-		<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+		<script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
 		<script type="text/javascript">
       var map;
       function initialize() {
