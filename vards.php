@@ -49,7 +49,7 @@ if($action <> "get")
     <meta name="description" content="Salīdzini Kedas bildes!"/>
     <meta name="keywords" content="Keda, foto, attēli, salīdzinājums"/>
     <meta name="author" content="Matīss Rikters"/>
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" type="text/css" href="includes/style.css">
         <link rel="stylesheet" type="text/css" href="includes/highslide/highslide.css">
         <script type="text/javascript" src="includes/highslide/highslide.js"></script>

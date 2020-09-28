@@ -6,7 +6,7 @@
 <meta name="description" content="Salīdzini Kedas bildes!"/>
 <meta name="keywords" content="Keda, foto, attēli, salīdzinājums"/>
 <meta name="author" content="Matīss Rikters"/>
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
 <link rel="stylesheet" type="text/css" href="includes/style.css">
 </head>
 <body style='margin: 0px; height: 100%;'>
@@ -23,14 +23,15 @@
 include('includes/init_sql.php');
 //zemākās
 
-$balsiojumi1 = mysqli_query($connection, "SELECT img, album, votes, (votes/views) rating FROM ratings where (votes/views) > 0 ORDER BY votes DESC LIMIT 0 , 10");
+$balsiojumi1 = mysqli_query($connection, "SELECT img, album, albumID, votes, (votes/views) rating FROM ratings where (votes/views) > 0 ORDER BY votes DESC LIMIT 0 , 10");
 while($r1=mysqli_fetch_array($balsiojumi1)){
 	$url=$r1["img"];
 	$balsis=$r1["rating"];
 	$albumID=$r1["album"];
+	$album_ID=$r1["albumID"];
 	$votes=$r1["votes"];
 	echo '<div style="display:bolck;">
-	<a target="_blank" href="http://lielakeda.lv/?album='.$albumID.'">
+	<a target="_blank" href="http://lielakeda.lv/albums/?cws_album='.$album_ID.'&cws_album_title='.$albumID.'">
 	<img style="float:left;width:95%;border-radius:25px;" src="'.preg_replace("~\/(?!.*\/)~", "/s2048/", $url).'"/></a><br/>';
 	echo '<span style="padding:15px;color:white;">Reitings: '.round($balsis, 2).' ('.$votes.' balsis)</span></div>';
 }
@@ -40,14 +41,15 @@ while($r1=mysqli_fetch_array($balsiojumi1)){
 <?php
 //augstākās
 
-$balsiojumi1 = mysqli_query($connection, "SELECT img, album, votes, (votes/views) rating FROM ratings where (votes/views) > 0 and votes>1 ORDER BY rating DESC, votes DESC LIMIT 0 , 10");
+$balsiojumi1 = mysqli_query($connection, "SELECT img, album, albumID, votes, (votes/views) rating FROM ratings where (votes/views) > 0 and votes>1 ORDER BY rating DESC, votes DESC LIMIT 0 , 10");
 while($r1=mysqli_fetch_array($balsiojumi1)){
 	$url=$r1["img"];
 	$balsis=$r1["rating"];
 	$albumID=$r1["album"];
+	$album_ID=$r1["albumID"];
 	$votes=$r1["votes"];
 	echo '<div style="display:bolck;">
-	<a target="_blank" href="http://lielakeda.lv/?album='.$albumID.'">
+	<a target="_blank" href="http://lielakeda.lv/albums/?cws_album='.$album_ID.'&cws_album_title='.$albumID.'">
 	<img style="float:right;width:95%;border-radius:25px;" src="'.preg_replace("~\/(?!.*\/)~", "/s2048/", $url).'"/></a><br/>';
 	echo '<span style="padding:15px;color:black;">Reitings: '.round($balsis, 2).' ('.$votes.' balsis)</span></div>';
 }

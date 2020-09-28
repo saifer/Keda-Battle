@@ -14,7 +14,7 @@ include('includes/init_sql.php');
 <meta name="description" content="Salīdzini Kedas bildes!"/>
 <meta name="keywords" content="Keda, foto, attēli, salīdzinājums"/>
 <meta name="author" content="Matīss Rikters"/>
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
 <link rel="stylesheet" type="text/css" href="includes/style.css">
 <link rel="stylesheet" type="text/css" href="includes/jq/css/smoothness/jquery-ui-1.10.1.custom.css" />
 <script type="text/javascript" src="includes/jq/js/jquery-1.9.1.js"></script>
@@ -856,12 +856,12 @@ for ($m=0;$m<count($yearz);$m++){
 
         var options = {
 					title:'Gads',
-					curveType: "function",
+					curveType: "none",
 					width: 650, height: 400,
-					vAxis: {maxValue: 7000,textStyle:{color: 'blue'}},
+					vAxis: {maxValue: 7000, minValue: 0, viewWindow: { min: 0 },textStyle:{color: 'blue'}},
 					series:{1:{targetAxisIndex:1}},
 					backgroundColor:'transparent',
-					vAxes:{1:{maxValue:200,textStyle:{color: 'red'}}}
+					vAxes:{1:{maxValue:200, minValue: 0, viewWindow: { min: 0 },textStyle:{color: 'red'}}}
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('chart_div7'));
@@ -883,9 +883,9 @@ for ($m=0;$m<count($gr_gad);$m++){
 
         var options = {
 					title:'Vidējais reitings pa gadiem',
-					curveType: "function",
+					curveType: "none",
 					width: 485, height: 300,
-					vAxis: {maxValue: 1,textStyle:{color: 'blue'}},
+					vAxis: {maxValue: 1, minValue: 0, viewWindow: { min: 0 }, textStyle:{color: 'blue'}},
 					backgroundColor:'transparent',
         };
 

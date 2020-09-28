@@ -72,7 +72,7 @@ if(isset($_GET['id']) && isset($_GET['skatita'])){
     <meta name="description" content="Salīdzini Kedas bildes!"/>
     <meta name="keywords" content="Keda, foto, attēli, salīdzinājums"/>
     <meta name="author" content="Matīss Rikters"/>
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" type="text/css" href="includes/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 </head>
@@ -90,6 +90,7 @@ $random_pic     = $rezultats1["img"];
 $rate1          = $rezultats1["votes"];
 $skatijumi      = $rezultats1["views"];
 $album_title    = $rezultats1["album"];
+$album_id	    = $rezultats1["albumID"];
 $model          = $rezultats1['model'];
 $iso            = $rezultats1['iso'];
 $fstop          = $rezultats1['fstop'];
@@ -109,6 +110,7 @@ $arandom_pic    = $rezultats2["img"];
 $rate2          = $rezultats2["votes"];
 $skatijumi2     = $rezultats2["views"];
 $aalbum_title   = $rezultats2["album"];
+$aalbum_id	    = $rezultats2["albumID"];
 $amodel         = $rezultats2['model'];
 $aiso           = $rezultats2['iso'];
 $afstop         = $rezultats2['fstop'];
@@ -168,15 +170,15 @@ if(substr($random_pic, 0, 4) == "http"){
     echo "<a href='?id=".$random_pic."&skatita=".$bildesID."'><img style='max-height:85%;max-width:46%;overflow: hidden;float:right;' onload='(function(){var imgElement = this; var jsonURL=\"https://photoslibrary.googleapis.com/v1/mediaItems/".$random_pic."?access_token=".$accessToken."\"; $.getJSON(jsonURL, function(data) { var imgURL = data.baseUrl+\"=w2000\"; imgElement.src=imgURL; }); }).call(this)' src='includes/bigLoader.gif'/></a><br style='clear:both;'/>";
 }
 
-	echo "<div style='float:left;width:40%;padding:15px;color:white;border:1px lightgrey solid;border-radius:15px;margin:15px;'>";
+	echo "<div style='float:right;width:40%;padding:15px;color:black;border:1px lightgrey solid;border-radius:15px;margin:15px;'>";
 	// echo 'Saite uz bildi:<br/>';
 	// echo '<input type="text" size="60" value="'.$aaa1.'"  readonly="readonly" /><br/><br/>';
 	echo "<b>Par bildi:</b><br/>";
 	if($skatijumi>0){echo "Reitings: ".$rate1/$skatijumi."<br/>";}else{echo "Reitings: vēl nav<br/>";}
 	echo "Balsis: ".$rate1."<br/>";
 	if($skatijumi>0){echo "Skatīta: ".$skatijumi." reizes<br/>";}else{echo "Skatīta: nav<br/>";}
-	if($tags[0]!="nav")echo "Atslēgvārdi: ";foreach($tags as $tag)if($tag!="nav")echo "<a style='text-decoration:none;color:white;font-weight:bold;' href='vards.php?v=".$tag."'>".$tag."</a>";if($tags[0]!="nav")echo"<br/>";
-	echo "Albums: <a style='color:white;font-weight:bold;' target='_blank' href='http://lielakeda.lv/?album=".$album_title."'>".$album_title."</a><br/><br/>";
+	if($tags[0]!="nav")echo "Atslēgvārdi: ";foreach($tags as $tag)if($tag!="nav")echo "<a style='text-decoration:none;color:black;font-weight:bold;' href='vards.php?v=".$tag."'>".$tag."</a>";if($tags[0]!="nav")echo"<br/>";
+	echo "Albums: <a style='color:black;font-weight:bold;' target='_blank' href='http://lielakeda.lv/albums/?cws_album=".$album_id."&cws_album_title=".$album_title."'>".$album_title."</a><br/><br/>";
 	echo "Uzņemts ar: ".$model."<br/>";
 	echo "ISO: ".$iso."<br/>";
 	echo "Diafragmas atvērums: F".$fstop."<br/>";
@@ -211,15 +213,15 @@ if(substr($random_pic, 0, 4) == "http"){
 	echo "Diena: ".$diena."<br/>";
 	echo "</div>";
 
-	echo "<div style='float:right;width:40%;padding:15px;border:1px lightgrey solid;border-radius:15px;margin:15px;'>";
+	echo "<div style='float:left;width:40%;padding:15px;color:white;border:1px lightgrey solid;border-radius:15px;margin:15px;'>";
 	// echo 'Saite uz bildi:<br/>';
 	// echo '<input type="text" size="60" value="'.$aaa2.'"  readonly="readonly" /><br/><br/>';
 	echo "<b>Par bildi:</b><br/>";
 	if($skatijumi2>0){echo "Reitings: ".$rate2/$skatijumi2."<br/>";}else{echo "Reitings: vēl nav<br/>";}
 	echo "Balsis: ".$rate2."<br/>";
 	if($skatijumi2>0){echo "Skatīta: ".$skatijumi2." reizes<br/>";}else{echo "Skatīta: nav<br/>";}
-	if($tags1[0]!="nav")echo "Atslēgvārdi: ";foreach($tags1 as $tag)if($tag!="nav")echo "<a style='text-decoration:none;color:black;font-weight:bold;' href='vards.php?v=".$tag."'>".$tag."</a>";if($tags1[0]!="nav")echo"<br/>";
-	echo "Albums: <a style='color:black;font-weight:bold;' target='_blank' href='http://lielakeda.lv/?album=".$aalbum_title."'>".$aalbum_title."</a><br/><br/>";
+	if($tags1[0]!="nav")echo "Atslēgvārdi: ";foreach($tags1 as $tag)if($tag!="nav")echo "<a style='text-decoration:none;color:white;font-weight:bold;' href='vards.php?v=".$tag."'>".$tag."</a>";if($tags1[0]!="nav")echo"<br/>";
+	echo "Albums: <a style='color:white;font-weight:bold;' target='_blank' href='http://lielakeda.lv/albums/?cws_album=".$aalbum_id."&cws_album_title=".$aalbum_title."'>".$aalbum_title."</a><br/><br/>";
 	echo "Uzņemts ar: ".$amodel."<br/>";
 	echo "ISO: ".$aiso."<br/>";
 	echo "Diafragmas atvērums: F".$afstop."<br/>";
