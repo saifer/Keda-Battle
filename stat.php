@@ -857,14 +857,21 @@ for ($m=0;$m<count($yearz);$m++){
         var options = {
 					title:'Gads',
 					curveType: "none",
-					width: 650, height: 400,
-					vAxis: {maxValue: 7000, minValue: 0, viewWindow: { min: 0 },textStyle:{color: 'blue'}},
+					width: 650, height: 350,
+					vAxis: {maxValue: 7000, minValue: 0, viewWindow: { min: 0 }, textStyle:{color: 'blue'}, format:'###0'},
+					hAxis: {format:'###000'},
 					series:{1:{targetAxisIndex:1}},
 					backgroundColor:'transparent',
-					vAxes:{1:{maxValue:200, minValue: 0, viewWindow: { min: 0 },textStyle:{color: 'red'}}}
+					vAxes:{1:{maxValue:200, minValue: 0, viewWindow: { min: 0 }, textStyle:{color: 'red'}}}
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('chart_div7'));
+		
+		var formatter = new google.visualization.NumberFormat({ groupingSymbol: '', fractionDigits: 0 });
+		formatter.format(data, 0);
+		formatter.format(data, 1);
+		formatter.format(data, 2);
+		
         chart.draw(data, options);
       }
 </script>
@@ -884,12 +891,18 @@ for ($m=0;$m<count($gr_gad);$m++){
         var options = {
 					title:'Vidējais reitings pa gadiem',
 					curveType: "none",
-					width: 485, height: 300,
+					legend:'top',
+					width: 650, height: 350,
 					vAxis: {maxValue: 1, minValue: 0, viewWindow: { min: 0 }, textStyle:{color: 'blue'}},
+					hAxis: {format:'###000'},
 					backgroundColor:'transparent',
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('chart_div10'));
+		
+		var formatter = new google.visualization.NumberFormat({ groupingSymbol: '', fractionDigits: 0 });
+		formatter.format(data, 0);
+		
         chart.draw(data, options);
       }
 </script>
